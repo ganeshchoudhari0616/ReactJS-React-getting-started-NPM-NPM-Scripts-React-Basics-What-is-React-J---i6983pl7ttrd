@@ -1,111 +1,84 @@
-import React, { useState } from "react";
+import '../styles/App.css';
+import React, { Component, useEffect, useState } from "react";
+import Slides from "./Slides"
 
-const App = () => {
-  let [ErrorMessage, setErrorMessage] = useState("");
-  const [input, setinput] = useState([
-    {
-      name: "",
-      email: "",
-      gender: "male",
-      phone: "",
-      password: ""
-    }
-  ]);
+const App = ({slides}) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [prevButtonDisabled, setPrevButtonDisabled] = useState(true);
+  const [nextButtonDisabled, setNextButtonDisabled] = useState(false);
+  const [restartButtonDisabled, setRestartButtonDisabled] = useState(true);
 
-  const handleclick = () => {
-    let main = input[0];
-    console.log(main);
-    let temp = main["name"];
-    let address = main["email"];
-    let password = main["password"];
-    let gender = main["gender"];
-    let phone = main["phone"];
-    if (
-      temp === "" ||
-      address === "" ||
-      password === "" ||
-      gender === "" ||
-      phone === ""
-    ) {
-      setErrorMessage("All fields are mandatory");
-      return;
+  const nextSlide = () => {
+    if (currentSlide < slides.length - 1) {
+      setCurrentSlide(currentSlide + 1);
     }
-let cnt1 = 0;
-    let cnt2 = 0;
-    for (let i = 0; i < temp.length; i++) {
-      if (
-        (temp[i] >= "a" && temp[i] <= "z") ||
-        (temp[i] >= "A" && temp[i] <= "Z")
-      ) {
-        cnt1++;
-      } else if (Number(temp[i]) >= 0 && Number(temp[i]) <= 9) {
-        cnt2++;
-      }
-      if (cnt1 && cnt2) {
-        break;
-      }
-    }
-
-    if (address.includes("@") === false) {
-      setErrorMessage("Email must contain @");
-      return;
-    }
-
-    if (!cnt1 || !cnt2) {
-      setErrorMessage("Name is not alphanumeric");
-      return;
-    }
-
-    if (isNaN(main["phone"])) {
-      setErrorMessage("Phone Number must contain only numbers");
-      return;
-    }
-    if (main["password"].length < 6) {
-      setErrorMessage("Password must contain atleast 6 letters");
-      return;
-    }
-    let info = main["email"];
-    info = info.substr(0, info.indexOf("@"));
-    console.log(info);
-    setErrorMessage("Hello " + info);
   };
-const handlechange = (e) => {
-    let dup = input;
-    dup = dup[0];
-    dup[e.target.name] = e.target.value;
-    setinput([dup]);
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    }
   };
+
+  const restartSlide = () => {
+    setCurrentSlide(0);
+    setNextButtonDisabled(!setNextButtonDisabled);
+    setPrevButtonDisabled(!setPrevButtonDisabled);
+  };
+
+  useEffect(() => {
+    // Next button disable
+    if (currentSlide < slides.length - 1) {
+      setNextButtonDisabled(false);
+    } else {
+      setNextButtonDisabled(true);
+    }
+
+    // Prev button disable
+    if (currentSlide > 0) {
+      setPrevButtonDisabled(false);
+    } else {
+      setPrevButtonDisabled(true);
+    }
+
+    // Restart button disable
+    if (currentSlide === 0) {
+      setRestartButtonDisabled(true);
+    } else {
+      setRestartButtonDisabled(false);
+    }
+  }, [currentSlide]);
+
+
   return (
-    <div id="main">
-      <div>{ErrorMessage}</div>
-      <label>Name:</label>
-      <input data-testid="name" name="name" onChange={handlechange} />
-      <br />
-      <label>Email address:</label>
-      <input data-testid="email" name="email" onChange={handlechange} />
-      <br />
-      <label>Gender:</label>
-      <input
-        value="male"
-        data-testid="gender"
-        name="gender"
-        onChange={handlechange}
+    <div>
+      <Slides 
+        title={slides[currentSlide].title}
+        text={slides[currentSlide].text}
       />
-      <br />
-      <label>Phone number:</label>
-      <input data-testid="phoneNumber" name="phone" onChange={handlechange} />
-      <br />
-      <label>Password:</label>
-      <input
-        data-testid="password"
-        type="password"
-        name="password"
-        onChange={handlechange}
-      />
-      <br />
-<button data-testid="submit" onClick={handleclick}>
-        Submit
-      </button>
+
+      <div id='navigation'>
+        <button data-testid="button-prev"
+          onClick={prevSlide}
+          disabled={prevButtonDisabled}
+        >
+          Prev
+        </button>
+
+        <button data-testid="button-next"
+          onClick={nextSlide}
+          disabled={nextButtonDisabled}
+        >
+          Next
+        </button>
+
+        <button data-testid="button-restart"
+          onClick={restartSlide}
+          disabled={restartButtonDisabled}
+        >
+          Restart
+        </button>
+      </div>
     </div>
   );
 };
